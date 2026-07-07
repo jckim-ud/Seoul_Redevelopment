@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: seoul-redevelopment
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: SEOUL_API_KEY
+        sync: false

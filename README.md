@@ -28,6 +28,25 @@ Kakao Maps JavaScript SDK를 사용하려면 [Kakao Developers](https://develope
 
 등록하지 않으면 지도가 로드되지 않고 콘솔에 도메인 관련 오류가 표시됩니다.
 
+## 인터넷에 배포하기 (Render.com, 무료)
+
+로컬에서만 실행하면 `http://localhost:3000`은 본인 컴퓨터에서만 접속됩니다. 다른 사람도 접속할 수 있게 하려면 Render.com에 배포하세요 (신용카드 등록 없이 무료로 사용 가능).
+
+1. [render.com](https://render.com) 접속 → GitHub 계정으로 가입/로그인
+2. 대시보드에서 `New +` → `Blueprint` 선택 → 이 저장소(`jckim-ud/Seoul_Redevelopment`) 선택
+   - 저장소에 포함된 `render.yaml`을 Render가 자동으로 인식해 빌드/실행 명령을 채워줍니다.
+   - Blueprint 메뉴가 안 보이면 `New +` → `Web Service`로 직접 만들고, Runtime `Node`, Build Command `npm install`, Start Command `npm start`, Instance Type `Free`를 수동으로 지정하세요.
+3. `SEOUL_API_KEY` 환경변수 값 입력 (서울 열린데이터광장 인증키)
+4. `Create Web Service` 클릭 → 첫 배포 완료까지 대기 (수 분 소요)
+5. 배포가 끝나면 `https://[서비스이름].onrender.com` 형태의 공개 주소가 발급됩니다
+6. 이 주소를 Kakao Developers → 앱 → `플랫폼 키` → `JavaScript 키` → `JavaScript SDK 도메인`에 추가로 등록 (기존 `http://localhost:3000`은 그대로 두고 추가)
+7. 발급된 주소로 접속해 정상 동작 확인
+
+**참고**
+
+- Render 무료 인스턴스는 15분 동안 요청이 없으면 슬립 상태가 되고, 다음 접속 시 30~60초 정도 콜드스타트가 걸립니다. 상시 대기가 필요하면 유료 플랜(Starter, $7/월)으로 전환하세요.
+- `main` 브랜치에 새로 푸시할 때마다 Render가 자동으로 재배포합니다.
+
 ## API 키 위치
 
 | 키 | 용도 | 위치 |
