@@ -1,0 +1,13 @@
+{
+  "name": "seoul-urban-renewal-dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "description": "서울시 도시계획 정비사업 현황 지도 대시보드",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}

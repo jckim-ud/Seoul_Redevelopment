@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>서울시 도시계획 정비사업 현황 지도 대시보드</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>서울시 도시계획 정비사업 현황 지도 대시보드</h1>
+    <p class="subtitle">서울 열린데이터광장 도시계획 정비사업(upisRebuild) 현황을 지도 위에서 확인합니다. 원본 데이터에는 좌표가 없어 위치명을 지오코딩해 표시합니다.</p>
+  </header>
+
+  <main>
+    <section class="status-card" aria-label="데이터 요약">
+      <div class="metric">
+        <span>전체 사업 건수</span>
+        <strong id="totalCount">-</strong>
+      </div>
+      <div class="metric">
+        <span>필터 조건 일치 건수</span>
+        <strong id="matchedCount">-</strong>
+      </div>
+      <div class="metric">
+        <span>지도 표시(지오코딩 성공)</span>
+        <strong id="geocodedCount">-</strong>
+      </div>
+      <div class="metric">
+        <span>지오코딩 실패</span>
+        <strong id="failedCount">-</strong>
+      </div>
+    </section>
+
+    <section class="toolbar panel" aria-label="필터">
+      <div class="filter-row">
+        <label>
+          대분류
+          <select id="lclsfSelect"><option value="">전체 대분류</option></select>
+        </label>
+        <label>
+          중분류
+          <select id="mclsfSelect"><option value="">전체 중분류</option></select>
+        </label>
+        <label>
+          소분류
+          <select id="sclsfSelect"><option value="">전체 소분류</option></select>
+        </label>
+        <label>
+          조서유형
+          <select id="rptTypeSelect"><option value="">전체 유형</option></select>
+        </label>
+      </div>
+      <div class="filter-row">
+        <label class="grow">
+          키워드 검색
+          <input type="text" id="keywordInput" placeholder="위치명 또는 지역명으로 검색 (예: 종로, 재개발)">
+        </label>
+        <label>
+          지도 표시 개수
+          <select id="limitSelect">
+            <option value="100">최대 100건</option>
+            <option value="300" selected>최대 300건</option>
+            <option value="500">최대 500건</option>
+            <option value="1000">최대 1000건</option>
+            <option value="0">전체(느릴 수 있음)</option>
+          </select>
+        </label>
+      </div>
+      <div class="toolbar-actions">
+        <p class="message" id="message">데이터를 불러오는 중입니다.</p>
+        <div class="button-group">
+          <button type="button" id="showOnMapButton" disabled>지도에 표시</button>
+          <button type="button" id="refreshButton">새로고침</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid">
+      <article class="panel map-panel">
+        <div class="panel-header">
+          <h2>정비사업 위치 지도</h2>
+          <span class="badge up" id="mapBadge">대기 중</span>
+        </div>
+        <div id="map"></div>
+      </article>
+
+      <aside class="sidebar">
+        <article class="panel">
+          <div class="panel-header">
+            <h2>자치구별 분포</h2>
+            <span class="badge down">지오코딩 결과 기준</span>
+          </div>
+          <div id="districtSummary" class="district-summary">
+            <div class="empty">아직 지도에 표시된 데이터가 없습니다.</div>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-header">
+            <h2>지도 표시 목록</h2>
+            <span class="badge up" id="resultCountBadge">0건</span>
+          </div>
+          <div id="resultList" class="scroll-panel">
+            <div class="empty">지도에 표시할 데이터가 없습니다.</div>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-header">
+            <h2>지오코딩 실패 목록</h2>
+            <span class="badge down" id="failedCountBadge">0건</span>
+          </div>
+          <div id="failedList" class="scroll-panel">
+            <div class="empty">실패한 항목이 없습니다.</div>
+          </div>
+        </article>
+      </aside>
+    </section>
+  </main>
+
+  <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=d7a6724780dee6f0babbc72b33775f84&libraries=services,clusterer"></script>
+  <script src="app.js"></script>
+</body>
+</html>
