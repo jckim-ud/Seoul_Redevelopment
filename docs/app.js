@@ -1,7 +1,7 @@
-﻿(() => {
+(() => {
   const API_ENDPOINT = "data/projects.json";
   const GEOCODE_CONCURRENCY = 5;
-  const DEFAULT_CENTER = { lat: 37.5665, lng: 126.978 }; // ?쒖슱?쒖껌
+  const DEFAULT_CENTER = { lat: 37.5665, lng: 126.978 }; // 서울시청
   const CACHE_PREFIX = "seoulUrbanRenewalGeo:";
 
   const els = {
@@ -62,13 +62,13 @@
   }
 
   function refreshLclsfOptions() {
-    populateSelect(els.lclsfSelect, uniqueValues(state.allRows, "LCLSF"), "?꾩껜 ?遺꾨쪟");
+    populateSelect(els.lclsfSelect, uniqueValues(state.allRows, "LCLSF"), "전체 대분류");
   }
 
   function refreshMclsfOptions() {
     const lclsf = els.lclsfSelect.value;
     const rows = lclsf ? state.allRows.filter((row) => row.LCLSF === lclsf) : state.allRows;
-    populateSelect(els.mclsfSelect, uniqueValues(rows, "MCLSF"), "?꾩껜 以묐텇瑜?);
+    populateSelect(els.mclsfSelect, uniqueValues(rows, "MCLSF"), "전체 중분류");
   }
 
   function refreshSclsfOptions() {
@@ -77,11 +77,11 @@
     let rows = state.allRows;
     if (lclsf) rows = rows.filter((row) => row.LCLSF === lclsf);
     if (mclsf) rows = rows.filter((row) => row.MCLSF === mclsf);
-    populateSelect(els.sclsfSelect, uniqueValues(rows, "SCLSF"), "?꾩껜 ?뚮텇瑜?);
+    populateSelect(els.sclsfSelect, uniqueValues(rows, "SCLSF"), "전체 소분류");
   }
 
   function refreshRptTypeOptions() {
-    populateSelect(els.rptTypeSelect, uniqueValues(state.allRows, "RPT_TYPE"), "?꾩껜 ?좏삎");
+    populateSelect(els.rptTypeSelect, uniqueValues(state.allRows, "RPT_TYPE"), "전체 유형");
   }
 
   function applyFilters() {
@@ -117,7 +117,7 @@
   }
 
   async function fetchProjects(forceRefresh) {
-    els.message.textContent = "?쒖슱 ?대┛?곗씠?곌킅?μ뿉???뺣퉬?ъ뾽 ?곗씠?곕? 遺덈윭?ㅻ뒗 以묒엯?덈떎.";
+    els.message.textContent = "서울 열린데이터광장에서 정비사업 데이터를 불러오는 중입니다.";
     setBusy(true);
 
     try {
@@ -126,7 +126,7 @@
       const payload = await response.json();
 
       if (!response.ok) {
-        throw new Error(payload.error || `?곗씠???붿껌 ?ㅽ뙣: HTTP ${response.status}`);
+        throw new Error(payload.error || `데이터 요청 실패: HTTP ${response.status}`);
       }
 
       state.allRows = payload.rows || [];
@@ -138,13 +138,13 @@
       refreshRptTypeOptions();
       applyFilters();
 
-      els.message.textContent = `?곗씠??${state.allRows.length.toLocaleString("ko-KR")}嫄댁쓣 遺덈윭?붿뒿?덈떎. ?꾪꽣瑜??ㅼ젙?섍퀬 "吏?꾩뿉 ?쒖떆"瑜??뚮윭二쇱꽭??`;
+      els.message.textContent = `데이터 ${state.allRows.length.toLocaleString("ko-KR")}건을 불러왔습니다. 필터를 설정하고 "지도에 표시"를 눌러주세요.`;
       if (!state.mapReady) {
-        els.message.textContent += " ?ㅻ쭔 移댁뭅??吏??SDK媛 濡쒕뱶?섏? ?딆븘 吏???쒖떆??鍮꾪솢?깊솕?섏뼱 ?덉뒿?덈떎.";
+        els.message.textContent += " 다만 카카오 지도 SDK가 로드되지 않아 지도 표시는 비활성화되어 있습니다.";
       }
     } catch (error) {
       console.error(error);
-      els.message.textContent = error.message || "?곗씠?곕? 遺덈윭?ㅼ? 紐삵뻽?듬땲??";
+      els.message.textContent = error.message || "데이터를 불러오지 못했습니다.";
     } finally {
       setBusy(false);
     }
@@ -154,12 +154,12 @@
     if (!pstnNm) return "";
     let address = pstnNm
       .replace(/\([^)]*\)/g, "")
-      .replace(/?쇱썝|?쇰?/g, "")
+      .replace(/일원|일대/g, "")
       .replace(/\s+/g, " ")
       .trim();
 
-    if (address && !address.startsWith("?쒖슱")) {
-      address = `?쒖슱?밸퀎??${address}`;
+    if (address && !address.startsWith("서울")) {
+      address = `서울특별시 ${address}`;
     }
 
     return address;
@@ -178,7 +178,7 @@
     try {
       localStorage.setItem(CACHE_PREFIX + key, JSON.stringify(value));
     } catch (error) {
-      // localStorage ?⑸웾 珥덇낵 ?깆? 臾댁떆?섍퀬 怨꾩냽 吏꾪뻾?⑸땲??
+      // localStorage 용량 초과 등은 무시하고 계속 진행합니다.
     }
   }
 
@@ -234,7 +234,7 @@
 
   async function startGeocoding(rows) {
     if (!state.mapReady) {
-      els.message.textContent = "移댁뭅??吏??SDK媛 以鍮꾨릺吏 ?딆븯?듬땲?? Kakao Developers?먯꽌 JavaScript SDK ?꾨찓???깅줉???뺤씤?섏꽭??";
+      els.message.textContent = "카카오 지도 SDK가 준비되지 않았습니다. Kakao Developers에서 JavaScript SDK 도메인 등록을 확인하세요.";
       return;
     }
 
@@ -242,7 +242,7 @@
     clearMap();
     state.geocodedItems = [];
     state.failedItems = [];
-    els.mapBadge.textContent = "吏?ㅼ퐫??以鍮?以?;
+    els.mapBadge.textContent = "지오코딩 준비 중";
 
     await runWithConcurrency(
       rows,
@@ -272,8 +272,8 @@
         state.geocodedItems.push({ row, ...cached });
       },
       (completed, total) => {
-        els.message.textContent = `吏?ㅼ퐫??以묒엯?덈떎. (${completed.toLocaleString("ko-KR")}/${total.toLocaleString("ko-KR")})`;
-        els.mapBadge.textContent = `吏꾪뻾 以?${completed}/${total}`;
+        els.message.textContent = `지오코딩 중입니다. (${completed.toLocaleString("ko-KR")}/${total.toLocaleString("ko-KR")})`;
+        els.mapBadge.textContent = `진행 중 ${completed}/${total}`;
       }
     );
 
@@ -284,8 +284,8 @@
 
     els.geocodedCount.textContent = state.geocodedItems.length.toLocaleString("ko-KR");
     els.failedCount.textContent = state.failedItems.length.toLocaleString("ko-KR");
-    els.mapBadge.textContent = `?쒖떆 ${state.geocodedItems.length}嫄?;
-    els.message.textContent = `?꾨즺: ${new Date().toLocaleString("ko-KR")} 湲곗? ${state.geocodedItems.length.toLocaleString("ko-KR")}嫄댁쓣 吏?꾩뿉 ?쒖떆?덉뒿?덈떎.`;
+    els.mapBadge.textContent = `표시 ${state.geocodedItems.length}건`;
+    els.message.textContent = `완료: ${new Date().toLocaleString("ko-KR")} 기준 ${state.geocodedItems.length.toLocaleString("ko-KR")}건을 지도에 표시했습니다.`;
 
     setBusy(false);
   }
@@ -299,14 +299,14 @@
     const row = item.row;
     return `
       <div class="info-window">
-        <h3>${escapeHtml(row.RGN_NM || row.PSTN_NM || "?뺣퉬?ъ뾽")}</h3>
+        <h3>${escapeHtml(row.RGN_NM || row.PSTN_NM || "정비사업")}</h3>
         <dl>
-          <dt>?먯튂援?/dt><dd>${escapeHtml(item.gu || "?뺤씤 遺덇?")}</dd>
-          <dt>?꾩튂紐?/dt><dd>${escapeHtml(row.PSTN_NM || "-")}</dd>
-          <dt>議곗꽌?좏삎</dt><dd>${escapeHtml(row.RPT_TYPE || "-")}</dd>
-          <dt>遺꾨쪟</dt><dd>${escapeHtml([row.LCLSF, row.MCLSF, row.SCLSF].filter(Boolean).join(" 쨌 ") || "-")}</dd>
-          <dt>硫댁쟻湲곗젙</dt><dd>${escapeHtml(row.AREA_EXS || "-")}</dd>
-          <dt>硫댁쟻蹂寃쏀썑</dt><dd>${escapeHtml(row.AREA_CHG_AFTR || "-")}</dd>
+          <dt>자치구</dt><dd>${escapeHtml(item.gu || "확인 불가")}</dd>
+          <dt>위치명</dt><dd>${escapeHtml(row.PSTN_NM || "-")}</dd>
+          <dt>조서유형</dt><dd>${escapeHtml(row.RPT_TYPE || "-")}</dd>
+          <dt>분류</dt><dd>${escapeHtml([row.LCLSF, row.MCLSF, row.SCLSF].filter(Boolean).join(" · ") || "-")}</dd>
+          <dt>면적기정</dt><dd>${escapeHtml(row.AREA_EXS || "-")}</dd>
+          <dt>면적변경후</dt><dd>${escapeHtml(row.AREA_CHG_AFTR || "-")}</dd>
         </dl>
       </div>
     `;
@@ -351,17 +351,17 @@
   }
 
   function renderResultList(items) {
-    els.resultCountBadge.textContent = `${items.length.toLocaleString("ko-KR")}嫄?;
+    els.resultCountBadge.textContent = `${items.length.toLocaleString("ko-KR")}건`;
 
     if (items.length === 0) {
-      els.resultList.innerHTML = '<div class="empty">吏?꾩뿉 ?쒖떆???곗씠?곌? ?놁뒿?덈떎.</div>';
+      els.resultList.innerHTML = '<div class="empty">지도에 표시할 데이터가 없습니다.</div>';
       return;
     }
 
     const html = `
       <table>
         <thead>
-          <tr><th>?먯튂援?/th><th>吏??챸 / ?꾩튂紐?/th></tr>
+          <tr><th>자치구</th><th>지역명 / 위치명</th></tr>
         </thead>
         <tbody>
           ${items.map((item, index) => `
@@ -389,17 +389,17 @@
   }
 
   function renderFailedList(items) {
-    els.failedCountBadge.textContent = `${items.length.toLocaleString("ko-KR")}嫄?;
+    els.failedCountBadge.textContent = `${items.length.toLocaleString("ko-KR")}건`;
 
     if (items.length === 0) {
-      els.failedList.innerHTML = '<div class="empty">?ㅽ뙣????ぉ???놁뒿?덈떎.</div>';
+      els.failedList.innerHTML = '<div class="empty">실패한 항목이 없습니다.</div>';
       return;
     }
 
     els.failedList.innerHTML = `
       <table>
         <thead>
-          <tr><th>吏??챸 / ?꾩튂紐?/th></tr>
+          <tr><th>지역명 / 위치명</th></tr>
         </thead>
         <tbody>
           ${items.map((row) => `
@@ -417,26 +417,26 @@
 
   function renderDistrictSummary(items) {
     if (items.length === 0) {
-      els.districtSummary.innerHTML = '<div class="empty">?꾩쭅 吏?꾩뿉 ?쒖떆???곗씠?곌? ?놁뒿?덈떎.</div>';
+      els.districtSummary.innerHTML = '<div class="empty">아직 지도에 표시된 데이터가 없습니다.</div>';
       return;
     }
 
     const counts = new Map();
     items.forEach((item) => {
-      const gu = item.gu || "?뺤씤 遺덇?";
+      const gu = item.gu || "확인 불가";
       counts.set(gu, (counts.get(gu) || 0) + 1);
     });
 
     const sorted = [...counts.entries()].sort((a, b) => b[1] - a[1]);
 
     els.districtSummary.innerHTML = sorted
-      .map(([gu, count]) => `<div class="district-chip">${escapeHtml(gu)} <span>${count}嫄?/span></div>`)
+      .map(([gu, count]) => `<div class="district-chip">${escapeHtml(gu)} <span>${count}건</span></div>`)
       .join("");
   }
 
   function initMap() {
     if (typeof kakao === "undefined" || !kakao.maps || !kakao.maps.services) {
-      throw new Error("移댁뭅??吏??SDK瑜?遺덈윭?ㅼ? 紐삵뻽?듬땲??");
+      throw new Error("카카오 지도 SDK를 불러오지 못했습니다.");
     }
 
     const container = document.querySelector("#map");
@@ -447,7 +447,7 @@
     geocoder = new kakao.maps.services.Geocoder();
     places = new kakao.maps.services.Places();
     state.mapReady = true;
-    els.mapBadge.textContent = "吏??以鍮??꾨즺";
+    els.mapBadge.textContent = "지도 준비 완료";
   }
 
   function bindEvents() {
@@ -475,8 +475,8 @@
     } catch (error) {
       console.warn(error);
       state.mapReady = false;
-      els.mapBadge.textContent = "吏??濡쒕뱶 ?ㅽ뙣";
-      document.querySelector("#map").innerHTML = '<div class="empty">移댁뭅??吏??SDK瑜?遺덈윭?ㅼ? 紐삵뻽?듬땲??<br>JavaScript ?ㅼ쓽 SDK ?꾨찓?몄뿉 ?꾩옱 ?묒냽 二쇱냼瑜??깅줉?섏꽭??</div>';
+      els.mapBadge.textContent = "지도 로드 실패";
+      document.querySelector("#map").innerHTML = '<div class="empty">카카오 지도 SDK를 불러오지 못했습니다.<br>JavaScript 키의 SDK 도메인에 현재 접속 주소를 등록하세요.</div>';
     }
 
     bindEvents();
@@ -485,4 +485,3 @@
 
   document.addEventListener("DOMContentLoaded", init);
 })();
-
